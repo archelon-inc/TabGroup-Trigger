@@ -24,6 +24,12 @@ const lastActiveTabInGroup = new Map();
  */
 let isActivatingTab = false;
 
+/**
+ * 自分でコマンドURLにリダイレクトしたタブIDを記録するSet
+ * これらのタブはセッション復活をスキップする
+ */
+const redirectedToCommandUrl = new Set();
+
 
 /**
  * webNavigationイベントをリッスンして、トリガーURLを検出する
@@ -142,6 +148,9 @@ async function switchTabGroup(value, triggerTabId) {
  */
 async function closeTab(tabId) {
   try {
+    // このタブIDを記録（⌘+Shift+Tで復活したものと区別するため）
+    redirectedToCommandUrl.add(tabId);
+
     // 特別なコマンドURLにナビゲート（セッション履歴を上書き）
     const restoreUrl = `https://${TRIGGER_DOMAIN}/${RESTORE_NEXT_PATH}`;
     await chrome.tabs.update(tabId, { url: restoreUrl });
@@ -150,13 +159,17 @@ async function closeTab(tabId) {
     setTimeout(async () => {
       try {
         await chrome.tabs.remove(tabId);
+        // タブを閉じた後、記録から削除
+        redirectedToCommandUrl.delete(tabId);
       } catch (error) {
         console.debug('TabGroup Trigger: タブクローズ:', error.message);
+        redirectedToCommandUrl.delete(tabId);
       }
     }, 100);
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
+    redirectedToCommandUrl.delete(tabId);
   }
 }
 
@@ -167,6 +180,16 @@ async function closeTab(tabId) {
  */
 async function restoreNextTabFromSession(commandTabId) {
   try {
+    // 自分でリダイレクトしたタブの場合は、セッション復活をスキップ
+    if (redirectedToCommandUrl.has(commandTabId)) {
+      console.log('TabGroup Trigger: 自分でリダイレクトしたコマンドURLをスキップ', commandTabId);
+      // タブは既にcloseTab内でクローズされる予定なので、ここでは何もしない
+      return;
+    }
+
+    // ⌘+Shift+Tで復活したコマンドURL - セッションから次のタブを復活
+    console.log('TabGroup Trigger: ⌘+Shift+Tで復活したコマンドURLを検知', commandTabId);
+
     // 最近閉じたタブを取得
     const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 1 });
 
