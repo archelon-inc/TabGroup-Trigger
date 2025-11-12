@@ -9,6 +9,11 @@
 const TRIGGER_DOMAIN = 'extension.tabgroup-trigger';
 
 /**
+ * セッションから次のタブを復活させるための特別なパス
+ */
+const RESTORE_NEXT_PATH = '__restore_next__';
+
+/**
  * 各タブグループで最後に選択されたタブIDを記憶するマップ
  * key: groupId, value: tabId
  */
@@ -18,6 +23,13 @@ const lastActiveTabInGroup = new Map();
  * 拡張機能がタブをアクティブ化中かどうかのフラグ
  */
 let isActivatingTab = false;
+
+/**
+ * 自分でコマンドURLにリダイレクトしたタブIDを記録するSet
+ * これらのタブはセッション復活をスキップする
+ */
+const redirectedToCommandUrl = new Set();
+
 
 /**
  * webNavigationイベントをリッスンして、トリガーURLを検出する
@@ -30,6 +42,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     }
 
     try {
+      // 自分でリダイレクトしたタブの場合は、何もしない（closeTab内で閉じられる）
+      if (redirectedToCommandUrl.has(details.tabId)) {
+        console.log('TabGroup Trigger: 自分でリダイレクトしたタブのナビゲーションをスキップ', details.tabId);
+        return;
+      }
+
       const url = new URL(details.url);
 
       // トリガードメインでない場合はスキップ
@@ -40,6 +58,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(
       // URLパスから値を抽出（先頭の"/"を除く）
       const rawValue = url.pathname.substring(1);
       const value = decodeURIComponent(rawValue);
+
+      // 特別なコマンド: セッションから次のタブを復活
+      if (value === RESTORE_NEXT_PATH) {
+        await restoreNextTabFromSession(details.tabId);
+        return;
+      }
 
       if (!value) {
         console.warn('TabGroup Trigger: 値が指定されていません');
@@ -124,14 +148,104 @@ async function switchTabGroup(value, triggerTabId) {
 
 /**
  * タブを安全にクローズする
+ * トリガーURLのタブは特別なコマンドURLにリダイレクトしてから閉じることで、
+ * ⌘+Shift+Tで復活した際にセッションから次のタブを復活させる
  * @param {number} tabId - クローズするタブのID
  */
 async function closeTab(tabId) {
   try {
-    await chrome.tabs.remove(tabId);
+    // このタブIDを記録（⌘+Shift+Tで復活したものと区別するため）
+    redirectedToCommandUrl.add(tabId);
+
+    // 特別なコマンドURLにナビゲート（セッション履歴を上書き）
+    const restoreUrl = `https://${TRIGGER_DOMAIN}/${RESTORE_NEXT_PATH}`;
+    await chrome.tabs.update(tabId, { url: restoreUrl });
+
+    // 少し待ってからタブを閉じる（ナビゲーションが完了するまで）
+    setTimeout(async () => {
+      try {
+        await chrome.tabs.remove(tabId);
+        // タブを閉じた後、記録から削除
+        redirectedToCommandUrl.delete(tabId);
+      } catch (error) {
+        console.debug('TabGroup Trigger: タブクローズ:', error.message);
+        redirectedToCommandUrl.delete(tabId);
+      }
+    }, 100);
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
+    redirectedToCommandUrl.delete(tabId);
+  }
+}
+
+/**
+ * セッションから次のタブを復活させる
+ * ⌘+Shift+Tで復活したコマンドURLタブの代わりに、その1つ前のタブを復活させる
+ * @param {number} commandTabId - コマンドURLのタブID
+ */
+async function restoreNextTabFromSession(commandTabId) {
+  try {
+    // 自分でリダイレクトしたタブの場合は、セッション復活をスキップ
+    // （タブはcloseTab内のsetTimeoutで閉じられる）
+    if (redirectedToCommandUrl.has(commandTabId)) {
+      console.log('TabGroup Trigger: 自分でリダイレクトしたコマンドURLをスキップ', commandTabId);
+      return;
+    }
+
+    // ⌘+Shift+Tで復活したコマンドURL - セッションから次のタブを復活
+    console.log('TabGroup Trigger: ⌘+Shift+Tで復活したコマンドURLを検知', commandTabId);
+
+    // 最近閉じたタブを最大数取得（Chromeの制限: MAX_SESSION_RESULTS = 25）
+    const maxResults = chrome.sessions.MAX_SESSION_RESULTS || 25;
+    const sessions = await chrome.sessions.getRecentlyClosed({ maxResults });
+
+    if (sessions.length === 0) {
+      console.log('TabGroup Trigger: 復活させるタブがありません');
+      await chrome.tabs.remove(commandTabId);
+      return;
+    }
+
+    // コマンドURLでない最初のタブを見つける
+    let foundNormalTab = false;
+    for (const session of sessions) {
+      if (session.tab) {
+        // コマンドURLでないタブを見つけた
+        if (!session.tab.url || !session.tab.url.includes(RESTORE_NEXT_PATH)) {
+          await chrome.sessions.restore(session.tab.sessionId);
+          console.log('TabGroup Trigger: タブを復活させました', session.tab.url);
+          foundNormalTab = true;
+          break;
+        } else {
+          console.log('TabGroup Trigger: コマンドURLをスキップ', session.tab.url);
+        }
+      } else if (session.window) {
+        await chrome.sessions.restore(session.window.sessionId);
+        console.log('TabGroup Trigger: ウィンドウを復活させました');
+        foundNormalTab = true;
+        break;
+      }
+    }
+
+    if (!foundNormalTab) {
+      console.warn(
+        'TabGroup Trigger: 通常のタブが見つかりませんでした。' +
+        `最近閉じた${maxResults}個のタブがすべてコマンドURLでした。` +
+        'これは、短時間に多数のタブグループ移動を行った場合に発生する可能性があります。'
+      );
+    }
+
+    // コマンドURLのタブを閉じる
+    await chrome.tabs.remove(commandTabId);
+
+  } catch (error) {
+    console.error('TabGroup Trigger: タブ復活エラー:', error);
+    // エラーが発生した場合でもコマンドタブは閉じる
+    try {
+      await chrome.tabs.remove(commandTabId);
+    } catch (e) {
+      console.debug('TabGroup Trigger: コマンドタブクローズエラー:', e.message);
+    }
   }
 }
 
@@ -156,3 +270,4 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
     console.debug('TabGroup Trigger: タブアクティブ化記録エラー:', error.message);
   }
 });
+
