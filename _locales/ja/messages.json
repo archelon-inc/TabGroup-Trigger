@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "URL経由でChromeのタブグループを切り替える"
+  },
+  "loading": {
+    "message": "読み込み中..."
+  },
+  "noTabGroups": {
+    "message": "タブグループがありません"
+  },
+  "errorOccurred": {
+    "message": "エラーが発生しました"
+  },
+  "untitled": {
+    "message": "(名前なし)"
+  },
+  "copyUrl": {
+    "message": "URLをコピー"
+  },
+  "copied": {
+    "message": "コピーしました！"
+  },
+  "copyFailed": {
+    "message": "コピー失敗"
+  }
+}
