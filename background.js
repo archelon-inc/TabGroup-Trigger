@@ -42,6 +42,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     }
 
     try {
+      // 自分でリダイレクトしたタブの場合は、何もしない（closeTab内で閉じられる）
+      if (redirectedToCommandUrl.has(details.tabId)) {
+        console.log('TabGroup Trigger: 自分でリダイレクトしたタブのナビゲーションをスキップ', details.tabId);
+        return;
+      }
+
       const url = new URL(details.url);
 
       // トリガードメインでない場合はスキップ
@@ -181,9 +187,9 @@ async function closeTab(tabId) {
 async function restoreNextTabFromSession(commandTabId) {
   try {
     // 自分でリダイレクトしたタブの場合は、セッション復活をスキップ
+    // （タブはcloseTab内のsetTimeoutで閉じられる）
     if (redirectedToCommandUrl.has(commandTabId)) {
       console.log('TabGroup Trigger: 自分でリダイレクトしたコマンドURLをスキップ', commandTabId);
-      // タブは既にcloseTab内でクローズされる予定なので、ここでは何もしない
       return;
     }
 
