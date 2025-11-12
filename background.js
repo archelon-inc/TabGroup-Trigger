@@ -196,8 +196,8 @@ async function restoreNextTabFromSession(commandTabId) {
     // ⌘+Shift+Tで復活したコマンドURL - セッションから次のタブを復活
     console.log('TabGroup Trigger: ⌘+Shift+Tで復活したコマンドURLを検知', commandTabId);
 
-    // 最近閉じたタブを取得
-    const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 1 });
+    // 最近閉じたタブを複数取得（コマンドURLが複数ある可能性があるため）
+    const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 25 });
 
     if (sessions.length === 0) {
       console.log('TabGroup Trigger: 復活させるタブがありません');
@@ -205,14 +205,29 @@ async function restoreNextTabFromSession(commandTabId) {
       return;
     }
 
-    // 最初のエントリ（最後に閉じたタブ）を復活
-    const session = sessions[0];
-    if (session.tab) {
-      await chrome.sessions.restore(session.tab.sessionId);
-      console.log('TabGroup Trigger: タブを復活させました', session.tab.url);
-    } else if (session.window) {
-      await chrome.sessions.restore(session.window.sessionId);
-      console.log('TabGroup Trigger: ウィンドウを復活させました');
+    // コマンドURLでない最初のタブを見つける
+    let foundNormalTab = false;
+    for (const session of sessions) {
+      if (session.tab) {
+        // コマンドURLでないタブを見つけた
+        if (!session.tab.url || !session.tab.url.includes(RESTORE_NEXT_PATH)) {
+          await chrome.sessions.restore(session.tab.sessionId);
+          console.log('TabGroup Trigger: タブを復活させました', session.tab.url);
+          foundNormalTab = true;
+          break;
+        } else {
+          console.log('TabGroup Trigger: コマンドURLをスキップ', session.tab.url);
+        }
+      } else if (session.window) {
+        await chrome.sessions.restore(session.window.sessionId);
+        console.log('TabGroup Trigger: ウィンドウを復活させました');
+        foundNormalTab = true;
+        break;
+      }
+    }
+
+    if (!foundNormalTab) {
+      console.log('TabGroup Trigger: 通常のタブが見つかりませんでした');
     }
 
     // コマンドURLのタブを閉じる
