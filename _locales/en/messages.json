@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Switch Chrome Tab Groups via URL invocation"
+  },
+  "loading": {
+    "message": "Loading..."
+  },
+  "noTabGroups": {
+    "message": "No tab groups found"
+  },
+  "errorOccurred": {
+    "message": "An error occurred"
+  },
+  "untitled": {
+    "message": "(Untitled)"
+  },
+  "copyUrl": {
+    "message": "Copy URL"
+  },
+  "copied": {
+    "message": "Copied!"
+  },
+  "copyFailed": {
+    "message": "Copy failed"
+  }
+}
