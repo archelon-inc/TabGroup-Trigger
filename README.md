@@ -106,7 +106,6 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → "仕事" group
 **Tab Restoration with ⌘+Shift+T:**
 - If you perform 25+ consecutive tab group switches, older tabs may not be restorable via ⌘+Shift+T
 - This is due to Chrome's session history limit (`chrome.sessions.MAX_SESSION_RESULTS = 25`)
-- For most use cases, this limit is sufficient
 
 ---
 
@@ -294,7 +293,6 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → 「仕事」グルー
 **⌘+Shift+T でのタブ復活:**
 - 25回以上連続でタブグループ移動を行うと、それより前のタブが ⌘+Shift+T で復活できなくなる可能性があります
 - これは Chrome のセッション履歴の制限（`chrome.sessions.MAX_SESSION_RESULTS = 25`）によるものです
-- ほとんどのユースケースでは、この制限で十分です
 
 ---
 
