@@ -23,11 +23,18 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
 ✓ URL-based Triggering
   Navigate to https://extension.tabgroup-trigger/{group-name} to instantly switch to the specified tab group
 
+✓ URL List Popup
+  Click the extension icon to view all tab groups with their URL-encoded URLs, easily copyable with one click
+
 【How to Use】
 1. Create tab groups in Chrome and give them names
-2. Set up URL-opening actions in your keyboard shortcut utility
+2. Click the extension icon to get the URLs for each group:
+   - URL-encoded URLs are automatically displayed
+   - Click "URLをコピー" (Copy URL) button to copy to clipboard
+   - Click the URL display area to select the text for manual copying
+3. Set up URL-opening actions in your keyboard shortcut utility
    Example: Cmd+Shift+1 → https://extension.tabgroup-trigger/Work
-3. Press your configured hotkey to instantly switch tab groups
+4. Press your configured hotkey to instantly switch tab groups
 
 【Recommended Tools】
 • macOS: BetterTouchTool, Keyboard Maestro
@@ -49,6 +56,7 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
   Note: Collapsed tab groups (where tabs are hidden but not removed) work fine
 • Special characters in group names (?, /, #, %, etc.) require URL encoding
   Example: "Question?Answer" → https://extension.tabgroup-trigger/Question%3FAnswer
+  Use the extension's popup UI to automatically get URL-encoded URLs
 • If you perform 25+ consecutive tab group switches, older tabs may not be restorable via Cmd+Shift+T due to Chrome's session history limit (chrome.sessions.MAX_SESSION_RESULTS = 25)
 
 【Privacy】

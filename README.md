@@ -21,6 +21,7 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
 
 - **Keyboard Shortcut Integration**: Works seamlessly with keyboard shortcut utilities to provide hotkey-based tab group switching
 - **URL-based Triggering**: Navigate to `https://extension.tabgroup-trigger/{group-name}` to instantly switch to the specified tab group
+- **URL List Popup**: Click the extension icon to view all tab groups with their URL-encoded URLs, easily copyable with one click
 - **Active Tab Memory**: Remembers the last active tab in each group and restores it when switching back
 - **Automatic Tab Cleanup**: The trigger tab closes automatically after switching groups
 - **URL-encoded Support**: Properly handles URL-encoded group names
@@ -48,7 +49,11 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
 ### Basic Usage
 
 1. Create tab groups in Chrome and give them names
-2. Use URLs to switch between groups:
+2. Click the extension icon to get the URLs for each group:
+   - URL-encoded URLs are automatically displayed
+   - Click "URLをコピー" (Copy URL) button to copy to clipboard
+   - Click the URL display area to select the text for manual copying
+3. Use URLs to switch between groups:
    - Navigate to `https://extension.tabgroup-trigger/Work` to switch to the "Work" group
    - Navigate to `https://extension.tabgroup-trigger/Personal` to switch to the "Personal" group
 
@@ -208,6 +213,7 @@ Chromeにはタブグループを切り替えるためのネイティブなキ�
 
 - **キーボードショートカット連携**: キーボードショートカットユーティリティとシームレスに連携し、ホットキーベースのタブグループ切り替えを実現
 - **URLベースのトリガー**: `https://extension.tabgroup-trigger/{グループ名}` にアクセスすると、指定したタブグループに即座に切り替わります
+- **URL一覧ポップアップ**: 拡張機能アイコンをクリックすると、全タブグループのURLエンコード済みURLを一覧表示し、ワンクリックでコピー可能
 - **アクティブタブの記憶**: 各グループで最後にアクティブだったタブを記憶し、グループに戻った際にそのタブを復元します
 - **自動タブクリーンアップ**: グループ切り替え後、トリガーURLのタブは自動的に閉じられます
 - **URLエンコード対応**: URLエンコードされたグループ名を正しく処理します
@@ -235,7 +241,11 @@ Chromeにはタブグループを切り替えるためのネイティブなキ�
 ### 基本的な使い方
 
 1. Chromeでタブグループを作成し、名前を付ける
-2. URLを使ってグループを切り替える:
+2. 拡張機能アイコンをクリックして、各グループのURLを取得:
+   - URLエンコード済みのURLが自動的に表示されます
+   - 「URLをコピー」ボタンでクリップボードにコピーできます
+   - URL表示部分をクリックすると、テキストが選択されて手動コピーも可能です
+3. URLを使ってグループを切り替える:
    - `https://extension.tabgroup-trigger/仕事` で「仕事」グループに切り替え
    - `https://extension.tabgroup-trigger/プライベート` で「プライベート」グループに切り替え
 
