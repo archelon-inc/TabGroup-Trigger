@@ -36,7 +36,7 @@ Chromeにはタブグループを切り替えるためのネイティブなキ�
    例: Cmd+Shift+1 → https://extension.tabgroup-trigger/仕事
 4. 設定したホットキーを押すと、瞬時にタブグループが切り替わります
 
-【推奨ツール】
+【キーボードショートカットユーティリティの例】
 • macOS: BetterTouchTool、Keyboard Maestro
 • Windows: AutoHotkey、PowerToys（バージョン 0.79 以降）
 

@@ -36,7 +36,7 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
    Example: Cmd+Shift+1 → https://extension.tabgroup-trigger/Work
 4. Press your configured hotkey to instantly switch tab groups
 
-【Recommended Tools】
+【Keyboard Shortcut Utility Examples】
 • macOS: BetterTouchTool, Keyboard Maestro
 • Windows: AutoHotkey, PowerToys (version 0.79 or later)
 
