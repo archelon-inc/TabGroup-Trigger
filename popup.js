@@ -11,6 +11,17 @@ const COLOR_MAP = {
   'orange': '#fa903e'
 };
 
+// i18n: data-i18n属性を持つ要素のテキストを置き換え
+function localizeHtmlElements() {
+  document.querySelectorAll('[data-i18n]').forEach(element => {
+    const messageName = element.getAttribute('data-i18n');
+    const message = chrome.i18n.getMessage(messageName);
+    if (message) {
+      element.textContent = message;
+    }
+  });
+}
+
 // タブグループを取得して表示
 async function loadTabGroups() {
   const container = document.getElementById('groups-container');
@@ -20,7 +31,7 @@ async function loadTabGroups() {
     const groups = await chrome.tabGroups.query({});
 
     if (groups.length === 0) {
-      container.innerHTML = '<div class="empty-message">タブグループがありません</div>';
+      container.innerHTML = `<div class="empty-message">${chrome.i18n.getMessage('noTabGroups')}</div>`;
       return;
     }
 
@@ -39,13 +50,13 @@ async function loadTabGroups() {
     });
   } catch (error) {
     console.error('Error loading tab groups:', error);
-    container.innerHTML = '<div class="empty-message">エラーが発生しました</div>';
+    container.innerHTML = `<div class="empty-message">${chrome.i18n.getMessage('errorOccurred')}</div>`;
   }
 }
 
 // グループアイテムのHTML要素を作成
 function createGroupItem(group) {
-  const groupName = group.title || '(名前なし)';
+  const groupName = group.title || chrome.i18n.getMessage('untitled');
   const encodedName = encodeURIComponent(groupName);
   const url = `https://extension.tabgroup-trigger/${encodedName}`;
   const color = COLOR_MAP[group.color] || COLOR_MAP['grey'];
@@ -59,7 +70,7 @@ function createGroupItem(group) {
       <div class="group-name">${escapeHtml(groupName)}</div>
     </div>
     <div class="group-url">${escapeHtml(url)}</div>
-    <button class="copy-button" data-url="${escapeHtml(url)}">URLをコピー</button>
+    <button class="copy-button" data-url="${escapeHtml(url)}">${chrome.i18n.getMessage('copyUrl')}</button>
   `;
 
   // コピーボタンのイベントリスナーを追加
@@ -84,7 +95,7 @@ async function copyToClipboard(button, text) {
 
     // ボタンのテキストとスタイルを一時的に変更
     const originalText = button.textContent;
-    button.textContent = 'コピーしました！';
+    button.textContent = chrome.i18n.getMessage('copied');
     button.classList.add('copied');
 
     // 1.5秒後に元に戻す
@@ -94,9 +105,9 @@ async function copyToClipboard(button, text) {
     }, 1500);
   } catch (error) {
     console.error('Failed to copy:', error);
-    button.textContent = 'コピー失敗';
+    button.textContent = chrome.i18n.getMessage('copyFailed');
     setTimeout(() => {
-      button.textContent = 'URLをコピー';
+      button.textContent = chrome.i18n.getMessage('copyUrl');
     }, 1500);
   }
 }
@@ -118,4 +129,7 @@ function selectText(element) {
 }
 
 // ページ読み込み時に実行
-document.addEventListener('DOMContentLoaded', loadTabGroups);
+document.addEventListener('DOMContentLoaded', () => {
+  localizeHtmlElements();
+  loadTabGroups();
+});
