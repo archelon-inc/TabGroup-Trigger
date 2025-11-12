@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "透過URL呼叫切換Chrome分頁群組"
+  },
+  "loading": {
+    "message": "載入中..."
+  },
+  "noTabGroups": {
+    "message": "找不到分頁群組"
+  },
+  "errorOccurred": {
+    "message": "發生錯誤"
+  },
+  "untitled": {
+    "message": "(未命名)"
+  },
+  "copyUrl": {
+    "message": "複製URL"
+  },
+  "copied": {
+    "message": "已複製！"
+  },
+  "copyFailed": {
+    "message": "複製失敗"
+  }
+}

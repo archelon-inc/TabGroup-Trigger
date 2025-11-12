@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Beralih grup tab Chrome melalui pemanggilan URL"
+  },
+  "loading": {
+    "message": "Memuat..."
+  },
+  "noTabGroups": {
+    "message": "Tidak ada grup tab yang ditemukan"
+  },
+  "errorOccurred": {
+    "message": "Terjadi kesalahan"
+  },
+  "untitled": {
+    "message": "(Tanpa judul)"
+  },
+  "copyUrl": {
+    "message": "Salin URL"
+  },
+  "copied": {
+    "message": "Disalin!"
+  },
+  "copyFailed": {
+    "message": "Gagal menyalin"
+  }
+}

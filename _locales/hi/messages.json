@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "URL आह्वान के माध्यम से Chrome टैब समूह स्विच करें"
+  },
+  "loading": {
+    "message": "लोड हो रहा है..."
+  },
+  "noTabGroups": {
+    "message": "कोई टैब समूह नहीं मिला"
+  },
+  "errorOccurred": {
+    "message": "एक त्रुटि हुई"
+  },
+  "untitled": {
+    "message": "(शीर्षकहीन)"
+  },
+  "copyUrl": {
+    "message": "URL कॉपी करें"
+  },
+  "copied": {
+    "message": "कॉपी किया गया!"
+  },
+  "copyFailed": {
+    "message": "कॉपी विफल"
+  }
+}

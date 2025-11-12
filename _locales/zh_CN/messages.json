@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "通过URL调用切换Chrome标签页组"
+  },
+  "loading": {
+    "message": "加载中..."
+  },
+  "noTabGroups": {
+    "message": "未找到标签页组"
+  },
+  "errorOccurred": {
+    "message": "发生错误"
+  },
+  "untitled": {
+    "message": "(无标题)"
+  },
+  "copyUrl": {
+    "message": "复制URL"
+  },
+  "copied": {
+    "message": "已复制！"
+  },
+  "copyFailed": {
+    "message": "复制失败"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Cambiar grupos de pestañas de Chrome mediante invocación de URL"
+  },
+  "loading": {
+    "message": "Cargando..."
+  },
+  "noTabGroups": {
+    "message": "No se encontraron grupos de pestañas"
+  },
+  "errorOccurred": {
+    "message": "Se produjo un error"
+  },
+  "untitled": {
+    "message": "(Sin título)"
+  },
+  "copyUrl": {
+    "message": "Copiar URL"
+  },
+  "copied": {
+    "message": "¡Copiado!"
+  },
+  "copyFailed": {
+    "message": "Error al copiar"
+  }
+}
