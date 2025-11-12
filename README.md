@@ -98,10 +98,10 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → "仕事" group
 
 ### Limitations
 
-**Saved Tab Groups (all tabs closed):**
-- Cannot switch to saved tab groups where all tabs have been closed
-- Only works with tab groups that have at least one open tab
-- Note: Collapsed tab groups (tabs hidden but not closed) work fine
+**Saved Tab Groups:**
+- Cannot switch to saved tab groups (where the group has been saved and all its tabs removed)
+- The extension requires at least one tab to exist in the target group
+- Note: Collapsed tab groups (where tabs are hidden but still exist) work fine
 
 **Tab Restoration with ⌘+Shift+T:**
 - If you perform 25+ consecutive tab group switches, older tabs may not be restorable via ⌘+Shift+T
@@ -286,10 +286,10 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → 「仕事」グルー
 
 ### 制限事項
 
-**保存されたタブグループ（全タブが閉じられている状態）:**
-- 全てのタブが閉じられた保存済みタブグループには移動できません
-- 少なくとも1つのタブが開いているタブグループのみが対象です
-- 注：折りたたまれたタブグループ（タブは開いているが非表示）は正常に動作します
+**保存されたタブグループ:**
+- 保存されたタブグループ（グループが保存され、タブが全て削除された状態）には移動できません
+- 拡張機能は、対象グループに少なくとも1つのタブが存在することを必要とします
+- 注：折りたたまれたタブグループ（タブは非表示だが存在している）は正常に動作します
 
 **⌘+Shift+T でのタブ復活:**
 - 25回以上連続でタブグループ移動を行うと、それより前のタブが ⌘+Shift+T で復活できなくなる可能性があります
