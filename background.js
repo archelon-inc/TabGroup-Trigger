@@ -9,6 +9,11 @@
 const TRIGGER_DOMAIN = 'extension.tabgroup-trigger';
 
 /**
+ * セッションから次のタブを復活させるための特別なパス
+ */
+const RESTORE_NEXT_PATH = '__restore_next__';
+
+/**
  * 各タブグループで最後に選択されたタブIDを記憶するマップ
  * key: groupId, value: tabId
  */
@@ -41,6 +46,12 @@ chrome.webNavigation.onBeforeNavigate.addListener(
       // URLパスから値を抽出（先頭の"/"を除く）
       const rawValue = url.pathname.substring(1);
       const value = decodeURIComponent(rawValue);
+
+      // 特別なコマンド: セッションから次のタブを復活
+      if (value === RESTORE_NEXT_PATH) {
+        await restoreNextTabFromSession(details.tabId);
+        return;
+      }
 
       if (!value) {
         console.warn('TabGroup Trigger: 値が指定されていません');
@@ -125,14 +136,15 @@ async function switchTabGroup(value, triggerTabId) {
 
 /**
  * タブを安全にクローズする
- * トリガーURLのタブはabout:blankにリダイレクトしてから閉じることで、
- * ⌘+Shift+Tで復活した際にトリガーURLではなくabout:blankが復活するようにする
+ * トリガーURLのタブは特別なコマンドURLにリダイレクトしてから閉じることで、
+ * ⌘+Shift+Tで復活した際にセッションから次のタブを復活させる
  * @param {number} tabId - クローズするタブのID
  */
 async function closeTab(tabId) {
   try {
-    // まずabout:blankにナビゲート（セッション履歴を上書き）
-    await chrome.tabs.update(tabId, { url: 'about:blank' });
+    // 特別なコマンドURLにナビゲート（セッション履歴を上書き）
+    const restoreUrl = `https://${TRIGGER_DOMAIN}/${RESTORE_NEXT_PATH}`;
+    await chrome.tabs.update(tabId, { url: restoreUrl });
 
     // 少し待ってからタブを閉じる（ナビゲーションが完了するまで）
     setTimeout(async () => {
@@ -145,6 +157,46 @@ async function closeTab(tabId) {
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
+  }
+}
+
+/**
+ * セッションから次のタブを復活させる
+ * ⌘+Shift+Tで復活したコマンドURLタブの代わりに、その1つ前のタブを復活させる
+ * @param {number} commandTabId - コマンドURLのタブID
+ */
+async function restoreNextTabFromSession(commandTabId) {
+  try {
+    // 最近閉じたタブを取得
+    const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 1 });
+
+    if (sessions.length === 0) {
+      console.log('TabGroup Trigger: 復活させるタブがありません');
+      await chrome.tabs.remove(commandTabId);
+      return;
+    }
+
+    // 最初のエントリ（最後に閉じたタブ）を復活
+    const session = sessions[0];
+    if (session.tab) {
+      await chrome.sessions.restore(session.tab.sessionId);
+      console.log('TabGroup Trigger: タブを復活させました', session.tab.url);
+    } else if (session.window) {
+      await chrome.sessions.restore(session.window.sessionId);
+      console.log('TabGroup Trigger: ウィンドウを復活させました');
+    }
+
+    // コマンドURLのタブを閉じる
+    await chrome.tabs.remove(commandTabId);
+
+  } catch (error) {
+    console.error('TabGroup Trigger: タブ復活エラー:', error);
+    // エラーが発生した場合でもコマンドタブは閉じる
+    try {
+      await chrome.tabs.remove(commandTabId);
+    } catch (e) {
+      console.debug('TabGroup Trigger: コマンドタブクローズエラー:', e.message);
+    }
   }
 }
 
