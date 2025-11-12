@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Chrome-Tab-Gruppen über URL-Aufruf wechseln"
+  },
+  "loading": {
+    "message": "Wird geladen..."
+  },
+  "noTabGroups": {
+    "message": "Keine Tab-Gruppen gefunden"
+  },
+  "errorOccurred": {
+    "message": "Ein Fehler ist aufgetreten"
+  },
+  "untitled": {
+    "message": "(Ohne Titel)"
+  },
+  "copyUrl": {
+    "message": "URL kopieren"
+  },
+  "copied": {
+    "message": "Kopiert!"
+  },
+  "copyFailed": {
+    "message": "Kopieren fehlgeschlagen"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Changer les groupes d'onglets Chrome via une invocation d'URL"
+  },
+  "loading": {
+    "message": "Chargement..."
+  },
+  "noTabGroups": {
+    "message": "Aucun groupe d'onglets trouvé"
+  },
+  "errorOccurred": {
+    "message": "Une erreur s'est produite"
+  },
+  "untitled": {
+    "message": "(Sans titre)"
+  },
+  "copyUrl": {
+    "message": "Copier l'URL"
+  },
+  "copied": {
+    "message": "Copié !"
+  },
+  "copyFailed": {
+    "message": "Échec de la copie"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "URL çağrısı ile Chrome sekme gruplarını değiştir"
+  },
+  "loading": {
+    "message": "Yükleniyor..."
+  },
+  "noTabGroups": {
+    "message": "Sekme grubu bulunamadı"
+  },
+  "errorOccurred": {
+    "message": "Bir hata oluştu"
+  },
+  "untitled": {
+    "message": "(Başlıksız)"
+  },
+  "copyUrl": {
+    "message": "URL'yi Kopyala"
+  },
+  "copied": {
+    "message": "Kopyalandı!"
+  },
+  "copyFailed": {
+    "message": "Kopyalama başarısız"
+  }
+}

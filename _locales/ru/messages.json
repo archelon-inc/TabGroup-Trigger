@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Переключение групп вкладок Chrome через вызов URL"
+  },
+  "loading": {
+    "message": "Загрузка..."
+  },
+  "noTabGroups": {
+    "message": "Группы вкладок не найдены"
+  },
+  "errorOccurred": {
+    "message": "Произошла ошибка"
+  },
+  "untitled": {
+    "message": "(Без названия)"
+  },
+  "copyUrl": {
+    "message": "Копировать URL"
+  },
+  "copied": {
+    "message": "Скопировано!"
+  },
+  "copyFailed": {
+    "message": "Не удалось скопировать"
+  }
+}

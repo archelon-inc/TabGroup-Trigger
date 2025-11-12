@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Chuyển đổi nhóm tab Chrome qua lời gọi URL"
+  },
+  "loading": {
+    "message": "Đang tải..."
+  },
+  "noTabGroups": {
+    "message": "Không tìm thấy nhóm tab"
+  },
+  "errorOccurred": {
+    "message": "Đã xảy ra lỗi"
+  },
+  "untitled": {
+    "message": "(Không có tiêu đề)"
+  },
+  "copyUrl": {
+    "message": "Sao chép URL"
+  },
+  "copied": {
+    "message": "Đã sao chép!"
+  },
+  "copyFailed": {
+    "message": "Sao chép thất bại"
+  }
+}

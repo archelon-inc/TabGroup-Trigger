@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "تبديل مجموعات علامات تبويب Chrome عبر استدعاء عنوان URL"
+  },
+  "loading": {
+    "message": "جارٍ التحميل..."
+  },
+  "noTabGroups": {
+    "message": "لم يتم العثور على مجموعات علامات تبويب"
+  },
+  "errorOccurred": {
+    "message": "حدث خطأ"
+  },
+  "untitled": {
+    "message": "(بدون عنوان)"
+  },
+  "copyUrl": {
+    "message": "نسخ عنوان URL"
+  },
+  "copied": {
+    "message": "تم النسخ!"
+  },
+  "copyFailed": {
+    "message": "فشل النسخ"
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Cambia gruppi di schede di Chrome tramite invocazione URL"
+  },
+  "loading": {
+    "message": "Caricamento..."
+  },
+  "noTabGroups": {
+    "message": "Nessun gruppo di schede trovato"
+  },
+  "errorOccurred": {
+    "message": "Si è verificato un errore"
+  },
+  "untitled": {
+    "message": "(Senza titolo)"
+  },
+  "copyUrl": {
+    "message": "Copia URL"
+  },
+  "copied": {
+    "message": "Copiato!"
+  },
+  "copyFailed": {
+    "message": "Copia non riuscita"
+  }
+}

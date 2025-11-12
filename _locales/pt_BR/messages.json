@@ -1,0 +1,29 @@
+{
+  "extensionName": {
+    "message": "TabGroup Trigger"
+  },
+  "extensionDescription": {
+    "message": "Alternar grupos de abas do Chrome por meio de invocação de URL"
+  },
+  "loading": {
+    "message": "Carregando..."
+  },
+  "noTabGroups": {
+    "message": "Nenhum grupo de abas encontrado"
+  },
+  "errorOccurred": {
+    "message": "Ocorreu um erro"
+  },
+  "untitled": {
+    "message": "(Sem título)"
+  },
+  "copyUrl": {
+    "message": "Copiar URL"
+  },
+  "copied": {
+    "message": "Copiado!"
+  },
+  "copyFailed": {
+    "message": "Falha ao copiar"
+  }
+}
