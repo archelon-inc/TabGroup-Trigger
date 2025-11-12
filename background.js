@@ -196,8 +196,9 @@ async function restoreNextTabFromSession(commandTabId) {
     // ⌘+Shift+Tで復活したコマンドURL - セッションから次のタブを復活
     console.log('TabGroup Trigger: ⌘+Shift+Tで復活したコマンドURLを検知', commandTabId);
 
-    // 最近閉じたタブを複数取得（コマンドURLが複数ある可能性があるため）
-    const sessions = await chrome.sessions.getRecentlyClosed({ maxResults: 25 });
+    // 最近閉じたタブを最大数取得（Chromeの制限: MAX_SESSION_RESULTS = 25）
+    const maxResults = chrome.sessions.MAX_SESSION_RESULTS || 25;
+    const sessions = await chrome.sessions.getRecentlyClosed({ maxResults });
 
     if (sessions.length === 0) {
       console.log('TabGroup Trigger: 復活させるタブがありません');
@@ -227,7 +228,11 @@ async function restoreNextTabFromSession(commandTabId) {
     }
 
     if (!foundNormalTab) {
-      console.log('TabGroup Trigger: 通常のタブが見つかりませんでした');
+      console.warn(
+        'TabGroup Trigger: 通常のタブが見つかりませんでした。' +
+        `最近閉じた${maxResults}個のタブがすべてコマンドURLでした。` +
+        'これは、短時間に多数のタブグループ移動を行った場合に発生する可能性があります。'
+      );
     }
 
     // コマンドURLのタブを閉じる
