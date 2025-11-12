@@ -20,10 +20,10 @@ const lastActiveTabInGroup = new Map();
 let isActivatingTab = false;
 
 /**
- * ⌘+Shift+Tで復活したトリガータブのIDを記録するSet
- * これらのタブは即座に閉じて、グループ切り替えをスキップする
+ * 最近閉じたトリガーURLを記録するMap (URL -> 閉じた時刻)
+ * 短時間（5秒以内）に同じURLが検出された場合は復活と判定する
  */
-const restoredTriggerTabs = new Set();
+const recentlyClosedTriggerUrls = new Map();
 
 /**
  * webNavigationイベントをリッスンして、トリガーURLを検出する
@@ -36,17 +36,20 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     }
 
     try {
-      // 復活したトリガータブの場合はスキップ（既に閉じられている）
-      if (restoredTriggerTabs.has(details.tabId)) {
-        restoredTriggerTabs.delete(details.tabId);
-        console.log('TabGroup Trigger: 復活したトリガータブのナビゲーションをスキップ', details.tabId);
-        return;
-      }
-
       const url = new URL(details.url);
 
       // トリガードメインでない場合はスキップ
       if (url.hostname !== TRIGGER_DOMAIN) {
+        return;
+      }
+
+      // 最近閉じたトリガーURLか確認（⌘+Shift+Tで復活した場合）
+      const closedTime = recentlyClosedTriggerUrls.get(details.url);
+      if (closedTime && (Date.now() - closedTime < 5000)) {
+        // 復活したトリガータブ - 即座に閉じて何もしない
+        console.log('TabGroup Trigger: 復活したトリガータブを検出して閉じます', details.tabId);
+        await chrome.tabs.remove(details.tabId);
+        recentlyClosedTriggerUrls.delete(details.url);
         return;
       }
 
@@ -136,11 +139,22 @@ async function switchTabGroup(value, triggerTabId) {
 }
 
 /**
- * タブを安全にクローズする
+ * タブを安全にクローズし、URLを記録する
  * @param {number} tabId - クローズするタブのID
  */
 async function closeTab(tabId) {
   try {
+    // タブ情報を取得してURLを記録
+    const tab = await chrome.tabs.get(tabId);
+    if (tab.url && tab.url.includes(TRIGGER_DOMAIN)) {
+      // トリガーURLを記録（5秒間保持）
+      recentlyClosedTriggerUrls.set(tab.url, Date.now());
+      setTimeout(() => {
+        recentlyClosedTriggerUrls.delete(tab.url);
+      }, 5000);
+      console.log('TabGroup Trigger: トリガーURLを記録', tab.url);
+    }
+
     await chrome.tabs.remove(tabId);
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
@@ -170,31 +184,3 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   }
 });
 
-/**
- * タブ作成時に、⌘+Shift+Tで復活したトリガータブを検出する
- */
-chrome.tabs.onCreated.addListener((tab) => {
-  try {
-    // 復活したタブの判定: pendingUrl が存在し、url と一致する場合
-    const isRestored = tab.pendingUrl && tab.pendingUrl === tab.url;
-
-    if (!isRestored) {
-      return;
-    }
-
-    // トリガーURLかどうかを判定
-    if (tab.pendingUrl && tab.pendingUrl.includes(TRIGGER_DOMAIN)) {
-      // 復活したトリガータブとして記録
-      restoredTriggerTabs.add(tab.id);
-
-      // 即座にタブを閉じる（グループ切り替えをスキップ）
-      chrome.tabs.remove(tab.id).catch(error => {
-        console.debug('TabGroup Trigger: 復活タブクローズ:', error.message);
-      });
-
-      console.log('TabGroup Trigger: 復活したトリガータブを検出して閉じました', tab.id);
-    }
-  } catch (error) {
-    console.debug('TabGroup Trigger: タブ作成検知エラー:', error.message);
-  }
-});
