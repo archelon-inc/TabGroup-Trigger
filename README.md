@@ -96,6 +96,17 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → "仕事" group
 - When you switch to a group, it will activate the tab you were last viewing
 - If no tab history exists, it activates the first tab in the group
 
+### Limitations
+
+**Saved Tab Groups:**
+- Cannot switch to saved tab groups (Chrome's "Save group" feature that removes all tabs but keeps the group label)
+- This is due to Chrome Extension API limitation - saved groups cannot be detected or queried
+- Note: Collapsed tab groups (where tabs are hidden but not removed) work fine
+
+**Tab Restoration with ⌘+Shift+T:**
+- If you perform 25+ consecutive tab group switches, older tabs may not be restorable via ⌘+Shift+T
+- This is due to Chrome's session history limit (`chrome.sessions.MAX_SESSION_RESULTS = 25`)
+
 ---
 
 ## For Developers
@@ -271,6 +282,17 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → 「仕事」グルー
 - 拡張機能は各グループで最後にアクティブだったタブを記憶します
 - グループに切り替えると、最後に見ていたタブがアクティブになります
 - タブ履歴がない場合は、グループの最初のタブがアクティブになります
+
+### 制限事項
+
+**保存されたタブグループ:**
+- 保存されたタブグループ（Chrome の「グループを保存」機能で全タブが削除されグループラベルのみ残る状態）には移動できません
+- これは Chrome Extension API の制限により、保存されたグループを検出・取得できないためです
+- 注：折りたたまれたタブグループ（タブは非表示だが削除されていない）は正常に動作します
+
+**⌘+Shift+T でのタブ復活:**
+- 25回以上連続でタブグループ移動を行うと、それより前のタブが ⌘+Shift+T で復活できなくなる可能性があります
+- これは Chrome のセッション履歴の制限（`chrome.sessions.MAX_SESSION_RESULTS = 25`）によるものです
 
 ---
 
