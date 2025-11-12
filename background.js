@@ -19,11 +19,6 @@ const lastActiveTabInGroup = new Map();
  */
 let isActivatingTab = false;
 
-/**
- * 最近閉じたトリガーURLを記録するMap (URL -> 閉じた時刻)
- * 短時間（5秒以内）に同じURLが検出された場合は復活と判定する
- */
-const recentlyClosedTriggerUrls = new Map();
 
 /**
  * webNavigationイベントをリッスンして、トリガーURLを検出する
@@ -40,16 +35,6 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 
       // トリガードメインでない場合はスキップ
       if (url.hostname !== TRIGGER_DOMAIN) {
-        return;
-      }
-
-      // 最近閉じたトリガーURLか確認（⌘+Shift+Tで復活した場合）
-      const closedTime = recentlyClosedTriggerUrls.get(details.url);
-      if (closedTime && (Date.now() - closedTime < 5000)) {
-        // 復活したトリガータブ - 即座に閉じて何もしない
-        console.log('TabGroup Trigger: 復活したトリガータブを検出して閉じます', details.tabId);
-        await chrome.tabs.remove(details.tabId);
-        recentlyClosedTriggerUrls.delete(details.url);
         return;
       }
 
@@ -139,23 +124,24 @@ async function switchTabGroup(value, triggerTabId) {
 }
 
 /**
- * タブを安全にクローズし、URLを記録する
+ * タブを安全にクローズする
+ * トリガーURLのタブはabout:blankにリダイレクトしてから閉じることで、
+ * ⌘+Shift+Tで復活した際にトリガーURLではなくabout:blankが復活するようにする
  * @param {number} tabId - クローズするタブのID
  */
 async function closeTab(tabId) {
   try {
-    // タブ情報を取得してURLを記録
-    const tab = await chrome.tabs.get(tabId);
-    if (tab.url && tab.url.includes(TRIGGER_DOMAIN)) {
-      // トリガーURLを記録（5秒間保持）
-      recentlyClosedTriggerUrls.set(tab.url, Date.now());
-      setTimeout(() => {
-        recentlyClosedTriggerUrls.delete(tab.url);
-      }, 5000);
-      console.log('TabGroup Trigger: トリガーURLを記録', tab.url);
-    }
+    // まずabout:blankにナビゲート（セッション履歴を上書き）
+    await chrome.tabs.update(tabId, { url: 'about:blank' });
 
-    await chrome.tabs.remove(tabId);
+    // 少し待ってからタブを閉じる（ナビゲーションが完了するまで）
+    setTimeout(async () => {
+      try {
+        await chrome.tabs.remove(tabId);
+      } catch (error) {
+        console.debug('TabGroup Trigger: タブクローズ:', error.message);
+      }
+    }, 100);
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
