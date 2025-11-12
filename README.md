@@ -99,9 +99,9 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → "仕事" group
 ### Limitations
 
 **Saved Tab Groups:**
-- Cannot switch to saved tab groups (where the group has been saved and all its tabs removed)
-- The extension requires at least one tab to exist in the target group
-- Note: Collapsed tab groups (where tabs are hidden but still exist) work fine
+- Cannot switch to saved tab groups (Chrome's "Save group" feature that removes all tabs but keeps the group label)
+- This is due to Chrome Extension API limitation - saved groups cannot be detected or queried
+- Note: Collapsed tab groups (where tabs are hidden but not removed) work fine
 
 **Tab Restoration with ⌘+Shift+T:**
 - If you perform 25+ consecutive tab group switches, older tabs may not be restorable via ⌘+Shift+T
@@ -287,9 +287,9 @@ https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → 「仕事」グルー
 ### 制限事項
 
 **保存されたタブグループ:**
-- 保存されたタブグループ（グループが保存され、タブが全て削除された状態）には移動できません
-- 拡張機能は、対象グループに少なくとも1つのタブが存在することを必要とします
-- 注：折りたたまれたタブグループ（タブは非表示だが存在している）は正常に動作します
+- 保存されたタブグループ（Chrome の「グループを保存」機能で全タブが削除されグループラベルのみ残る状態）には移動できません
+- これは Chrome Extension API の制限により、保存されたグループを検出・取得できないためです
+- 注：折りたたまれたタブグループ（タブは非表示だが削除されていない）は正常に動作します
 
 **⌘+Shift+T でのタブ復活:**
 - 25回以上連続でタブグループ移動を行うと、それより前のタブが ⌘+Shift+T で復活できなくなる可能性があります
