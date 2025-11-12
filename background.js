@@ -9,6 +9,17 @@
 const TRIGGER_DOMAIN = 'extension.tabgroup-trigger';
 
 /**
+ * 各タブグループで最後に選択されたタブIDを記憶するマップ
+ * key: groupId, value: tabId
+ */
+const lastActiveTabInGroup = new Map();
+
+/**
+ * 拡張機能がタブをアクティブ化中かどうかのフラグ
+ */
+let isActivatingTab = false;
+
+/**
  * webNavigationイベントをリッスンして、トリガーURLを検出する
  */
 chrome.webNavigation.onBeforeNavigate.addListener(
@@ -61,23 +72,8 @@ async function switchTabGroup(value, triggerTabId) {
       return;
     }
 
-    let targetGroup = null;
-
-    // 1. まずグループ名での完全一致を試みる（優先度高）
-    targetGroup = groups.find(group => group.title === value);
-
-    // 2. グループ名で見つからない場合、数値として位置を解釈
-    if (!targetGroup && /^\d+$/.test(value)) {
-      const position = parseInt(value, 10);
-
-      // タブグループを位置順にソート（左から右）
-      const sortedGroups = await sortGroupsByPosition(groups);
-
-      // 1ベースのインデックスを0ベースに変換
-      if (position >= 1 && position <= sortedGroups.length) {
-        targetGroup = sortedGroups[position - 1];
-      }
-    }
+    // グループ名での完全一致を試みる
+    const targetGroup = groups.find(group => group.title === value);
 
     if (!targetGroup) {
       console.warn(`TabGroup Trigger: グループが見つかりません: ${value}`);
@@ -85,7 +81,7 @@ async function switchTabGroup(value, triggerTabId) {
       return;
     }
 
-    // 対象グループの最初のタブを取得してアクティブ化
+    // 対象グループのタブを取得
     const groupTabs = await chrome.tabs.query({ groupId: targetGroup.id });
 
     if (groupTabs.length === 0) {
@@ -94,10 +90,28 @@ async function switchTabGroup(value, triggerTabId) {
       return;
     }
 
-    // 最初のタブをアクティブ化
-    const firstTab = groupTabs[0];
-    await chrome.tabs.update(firstTab.id, { active: true });
-    await chrome.windows.update(firstTab.windowId, { focused: true });
+    let targetTab = null;
+
+    // 1. このグループで最後に選択されたタブを記憶から取得
+    const rememberedTabId = lastActiveTabInGroup.get(targetGroup.id);
+    if (rememberedTabId) {
+      targetTab = groupTabs.find(tab => tab.id === rememberedTabId);
+    }
+
+    // 2. 記憶されたタブが見つからない場合は最初のタブを使用
+    if (!targetTab) {
+      targetTab = groupTabs[0];
+    }
+
+    // 対象タブをアクティブ化（フラグを立てて記録を防ぐ）
+    isActivatingTab = true;
+    await chrome.tabs.update(targetTab.id, { active: true });
+    await chrome.windows.update(targetTab.windowId, { focused: true });
+
+    // 少し待ってからフラグを下ろす（イベント処理が完了するまで）
+    setTimeout(() => {
+      isActivatingTab = false;
+    }, 100);
 
     // トリガータブをクローズ
     await closeTab(triggerTabId);
@@ -106,27 +120,6 @@ async function switchTabGroup(value, triggerTabId) {
     console.error('TabGroup Trigger: グループ切り替えエラー:', error);
     await closeTab(triggerTabId);
   }
-}
-
-/**
- * タブグループを位置順（左から右）にソートする
- * @param {Array} groups - タブグループの配列
- * @returns {Promise<Array>} ソート済みのタブグループ配列
- */
-async function sortGroupsByPosition(groups) {
-  // 各グループの最小タブインデックスを取得してソート
-  const groupsWithPosition = await Promise.all(
-    groups.map(async (group) => {
-      const tabs = await chrome.tabs.query({ groupId: group.id });
-      const minIndex = Math.min(...tabs.map(tab => tab.index));
-      return { group, minIndex };
-    })
-  );
-
-  // 最小インデックスでソート（左から右）
-  groupsWithPosition.sort((a, b) => a.minIndex - b.minIndex);
-
-  return groupsWithPosition.map(item => item.group);
 }
 
 /**
@@ -141,3 +134,25 @@ async function closeTab(tabId) {
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
   }
 }
+
+/**
+ * タブがアクティブになったときに、そのグループで最後に選択されたタブとして記憶する
+ */
+chrome.tabs.onActivated.addListener(async (activeInfo) => {
+  // 拡張機能自身がアクティブ化した場合は記録しない
+  if (isActivatingTab) {
+    return;
+  }
+
+  try {
+    const tab = await chrome.tabs.get(activeInfo.tabId);
+
+    // タブグループに属している場合のみ記録（groupId が -1 でない場合）
+    if (tab.groupId !== -1) {
+      lastActiveTabInGroup.set(tab.groupId, tab.id);
+    }
+  } catch (error) {
+    // エラーは無視（タブが既に閉じられている場合など）
+    console.debug('TabGroup Trigger: タブアクティブ化記録エラー:', error.message);
+  }
+});
