@@ -20,6 +20,12 @@ const lastActiveTabInGroup = new Map();
 let isActivatingTab = false;
 
 /**
+ * ⌘+Shift+Tで復活したトリガータブのIDを記録するSet
+ * これらのタブは即座に閉じて、グループ切り替えをスキップする
+ */
+const restoredTriggerTabs = new Set();
+
+/**
  * webNavigationイベントをリッスンして、トリガーURLを検出する
  */
 chrome.webNavigation.onBeforeNavigate.addListener(
@@ -30,6 +36,13 @@ chrome.webNavigation.onBeforeNavigate.addListener(
     }
 
     try {
+      // 復活したトリガータブの場合はスキップ（既に閉じられている）
+      if (restoredTriggerTabs.has(details.tabId)) {
+        restoredTriggerTabs.delete(details.tabId);
+        console.log('TabGroup Trigger: 復活したトリガータブのナビゲーションをスキップ', details.tabId);
+        return;
+      }
+
       const url = new URL(details.url);
 
       // トリガードメインでない場合はスキップ
@@ -123,22 +136,12 @@ async function switchTabGroup(value, triggerTabId) {
 }
 
 /**
- * タブを安全にクローズし、履歴からも削除する
+ * タブを安全にクローズする
  * @param {number} tabId - クローズするタブのID
  */
 async function closeTab(tabId) {
   try {
-    // タブ情報を取得してURLを保存
-    const tab = await chrome.tabs.get(tabId);
-    const url = tab.url;
-
-    // タブを削除
     await chrome.tabs.remove(tabId);
-
-    // 履歴からも削除（⌘+Shift+tで復活しないようにする）
-    if (url) {
-      await chrome.history.deleteUrl({ url: url });
-    }
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
@@ -164,5 +167,34 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
   } catch (error) {
     // エラーは無視（タブが既に閉じられている場合など）
     console.debug('TabGroup Trigger: タブアクティブ化記録エラー:', error.message);
+  }
+});
+
+/**
+ * タブ作成時に、⌘+Shift+Tで復活したトリガータブを検出する
+ */
+chrome.tabs.onCreated.addListener((tab) => {
+  try {
+    // 復活したタブの判定: pendingUrl が存在し、url と一致する場合
+    const isRestored = tab.pendingUrl && tab.pendingUrl === tab.url;
+
+    if (!isRestored) {
+      return;
+    }
+
+    // トリガーURLかどうかを判定
+    if (tab.pendingUrl && tab.pendingUrl.includes(TRIGGER_DOMAIN)) {
+      // 復活したトリガータブとして記録
+      restoredTriggerTabs.add(tab.id);
+
+      // 即座にタブを閉じる（グループ切り替えをスキップ）
+      chrome.tabs.remove(tab.id).catch(error => {
+        console.debug('TabGroup Trigger: 復活タブクローズ:', error.message);
+      });
+
+      console.log('TabGroup Trigger: 復活したトリガータブを検出して閉じました', tab.id);
+    }
+  } catch (error) {
+    console.debug('TabGroup Trigger: タブ作成検知エラー:', error.message);
   }
 });

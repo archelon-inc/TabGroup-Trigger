@@ -6,8 +6,7 @@
   "permissions": [
     "tabs",
     "tabGroups",
-    "webNavigation",
-    "history"
+    "webNavigation"
   ],
   "host_permissions": [
     "https://extension.tabgroup-trigger/*"
