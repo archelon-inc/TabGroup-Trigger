@@ -27,7 +27,8 @@ chrome.webNavigation.onBeforeNavigate.addListener(
       }
 
       // URLパスから値を抽出（先頭の"/"を除く）
-      const value = url.pathname.substring(1);
+      const rawValue = url.pathname.substring(1);
+      const value = decodeURIComponent(rawValue);
 
       if (!value) {
         console.warn('TabGroup Trigger: 値が指定されていません');
