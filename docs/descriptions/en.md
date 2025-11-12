@@ -30,7 +30,7 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
 1. Create tab groups in Chrome and give them names
 2. Click the extension icon to get the URLs for each group:
    - URL-encoded URLs are automatically displayed
-   - Click "URLをコピー" (Copy URL) button to copy to clipboard
+   - Click "Copy URL" button to copy to clipboard
    - Click the URL display area to select the text for manual copying
 3. Set up URL-opening actions in your keyboard shortcut utility
    Example: Cmd+Shift+1 → https://extension.tabgroup-trigger/Work
