@@ -123,12 +123,22 @@ async function switchTabGroup(value, triggerTabId) {
 }
 
 /**
- * タブを安全にクローズする
+ * タブを安全にクローズし、履歴からも削除する
  * @param {number} tabId - クローズするタブのID
  */
 async function closeTab(tabId) {
   try {
+    // タブ情報を取得してURLを保存
+    const tab = await chrome.tabs.get(tabId);
+    const url = tab.url;
+
+    // タブを削除
     await chrome.tabs.remove(tabId);
+
+    // 履歴からも削除（⌘+Shift+tで復活しないようにする）
+    if (url) {
+      await chrome.history.deleteUrl({ url: url });
+    }
   } catch (error) {
     // タブが既にクローズされている場合などはエラーを無視
     console.debug('TabGroup Trigger: タブクローズ:', error.message);
