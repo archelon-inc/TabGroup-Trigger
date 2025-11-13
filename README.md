@@ -189,6 +189,10 @@ gh pr create --base main --head your-branch
 
 See [LICENSE](LICENSE) file for details.
 
+## Privacy Policy
+
+For information about data collection and privacy practices, see our [Privacy Policy](https://archelon-inc.github.io/TabGroup-Trigger/privacy-policy).
+
 ---
 ---
 
@@ -380,3 +384,7 @@ gh pr create --base main --head your-branch
 ## ライセンス
 
 詳細は[LICENSE](LICENSE)ファイルを参照してください。
+
+## プライバシーポリシー
+
+データ収集とプライバシーに関する情報については、[プライバシーポリシー](https://archelon-inc.github.io/TabGroup-Trigger/privacy-policy-ja)をご覧ください。
