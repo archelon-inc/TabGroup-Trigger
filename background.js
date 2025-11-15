@@ -14,10 +14,9 @@ const TRIGGER_DOMAIN = 'extension.tabgroup-trigger';
 const RESTORE_NEXT_PATH = '__restore_next__';
 
 /**
- * 各タブグループで最後に選択されたタブIDを記憶するマップ
- * key: groupId, value: tabId
+ * chrome.storage.localのキー名（各タブグループで最後に選択されたタブIDを保存）
  */
-const lastActiveTabInGroup = new Map();
+const STORAGE_KEY_LAST_ACTIVE_TAB = 'lastActiveTabInGroup';
 
 /**
  * 拡張機能がタブをアクティブ化中かどうかのフラグ
@@ -29,6 +28,38 @@ let isActivatingTab = false;
  * これらのタブはセッション復活をスキップする
  */
 const redirectedToCommandUrl = new Set();
+
+/**
+ * ストレージから指定されたタブグループの最後のアクティブタブIDを取得
+ * @param {number} groupId - タブグループID
+ * @returns {Promise<number|null>} 最後のアクティブタブID、または存在しない場合はnull
+ */
+async function getLastActiveTab(groupId) {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEY_LAST_ACTIVE_TAB);
+    const lastActiveTabInGroup = result[STORAGE_KEY_LAST_ACTIVE_TAB] || {};
+    return lastActiveTabInGroup[groupId] || null;
+  } catch (error) {
+    console.error('TabGroup Trigger: ストレージ読み込みエラー:', error);
+    return null;
+  }
+}
+
+/**
+ * 指定されたタブグループの最後のアクティブタブIDをストレージに保存
+ * @param {number} groupId - タブグループID
+ * @param {number} tabId - タブID
+ */
+async function setLastActiveTab(groupId, tabId) {
+  try {
+    const result = await chrome.storage.local.get(STORAGE_KEY_LAST_ACTIVE_TAB);
+    const lastActiveTabInGroup = result[STORAGE_KEY_LAST_ACTIVE_TAB] || {};
+    lastActiveTabInGroup[groupId] = tabId;
+    await chrome.storage.local.set({ [STORAGE_KEY_LAST_ACTIVE_TAB]: lastActiveTabInGroup });
+  } catch (error) {
+    console.error('TabGroup Trigger: ストレージ保存エラー:', error);
+  }
+}
 
 
 /**
@@ -67,11 +98,15 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 
       if (!value) {
         console.warn('TabGroup Trigger: 値が指定されていません');
+        await closeTab(details.tabId);
         return;
       }
 
+      // トリガータブをクローズ（先に不要なタブを処分）
+      await closeTab(details.tabId);
+
       // タブグループを切り替える
-      await switchTabGroup(value, details.tabId);
+      await switchTabGroup(value);
 
     } catch (error) {
       console.error('TabGroup Trigger エラー:', error);
@@ -83,16 +118,14 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 /**
  * 指定された値に基づいてタブグループを切り替える
  * @param {string} value - グループ名または位置（1ベース）
- * @param {number} triggerTabId - トリガーURLを開いたタブのID
  */
-async function switchTabGroup(value, triggerTabId) {
+async function switchTabGroup(value) {
   try {
     // すべてのタブグループを取得
     const groups = await chrome.tabGroups.query({});
 
     if (groups.length === 0) {
       console.warn('TabGroup Trigger: タブグループが存在しません');
-      await closeTab(triggerTabId);
       return;
     }
 
@@ -101,7 +134,6 @@ async function switchTabGroup(value, triggerTabId) {
 
     if (!targetGroup) {
       console.warn(`TabGroup Trigger: グループが見つかりません: ${value}`);
-      await closeTab(triggerTabId);
       return;
     }
 
@@ -110,14 +142,13 @@ async function switchTabGroup(value, triggerTabId) {
 
     if (groupTabs.length === 0) {
       console.warn(`TabGroup Trigger: グループにタブが存在しません: ${targetGroup.title}`);
-      await closeTab(triggerTabId);
       return;
     }
 
     let targetTab = null;
 
     // 1. このグループで最後に選択されたタブを記憶から取得
-    const rememberedTabId = lastActiveTabInGroup.get(targetGroup.id);
+    const rememberedTabId = await getLastActiveTab(targetGroup.id);
     if (rememberedTabId) {
       targetTab = groupTabs.find(tab => tab.id === rememberedTabId);
     }
@@ -137,12 +168,8 @@ async function switchTabGroup(value, triggerTabId) {
       isActivatingTab = false;
     }, 100);
 
-    // トリガータブをクローズ
-    await closeTab(triggerTabId);
-
   } catch (error) {
     console.error('TabGroup Trigger: グループ切り替えエラー:', error);
-    await closeTab(triggerTabId);
   }
 }
 
@@ -263,7 +290,7 @@ chrome.tabs.onActivated.addListener(async (activeInfo) => {
 
     // タブグループに属している場合のみ記録（groupId が -1 でない場合）
     if (tab.groupId !== -1) {
-      lastActiveTabInGroup.set(tab.groupId, tab.id);
+      await setLastActiveTab(tab.groupId, tab.id);
     }
   } catch (error) {
     // エラーは無視（タブが既に閉じられている場合など）
