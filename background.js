@@ -102,11 +102,19 @@ chrome.webNavigation.onBeforeNavigate.addListener(
         return;
       }
 
-      // トリガータブをクローズ（先に不要なタブを処分）
-      await closeTab(details.tabId);
-
-      // タブグループを切り替える
-      await switchTabGroup(value);
+      const resultTab = url.searchParams.get('result') === 'tab';
+      try {
+        const windowId = await switchTabGroup(value, url.searchParams.get('window') === 'separate', details.tabId);
+        if (resultTab) {
+          if (!Number.isInteger(windowId)) throw new Error(`Group not found: ${value}`);
+          await chrome.tabs.update(details.tabId, { url: `${chrome.runtime.getURL('result.html')}#window=${windowId}` });
+        }
+      } catch (error) {
+        if (!resultTab) throw error;
+        await chrome.tabs.update(details.tabId, { url: `${chrome.runtime.getURL('result.html')}#error=${encodeURIComponent(error.message)}` });
+      } finally {
+        if (!resultTab) await closeTab(details.tabId);
+      }
 
     } catch (error) {
       console.error('TabGroup Trigger エラー:', error);
@@ -118,8 +126,11 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 /**
  * 指定された値に基づいてタブグループを切り替える
  * @param {string} value - グループ名または位置（1ベース）
+ * @param {boolean} separate - グループだけの独立ウィンドウで表示するか
+ * @param {number} triggerTabId - 切替後に閉じるトリガータブ
+ * @returns {Promise<number|undefined>} 表示したウィンドウの ID
  */
-async function switchTabGroup(value) {
+async function switchTabGroup(value, separate, triggerTabId) {
   try {
     // すべてのタブグループを取得
     const groups = await chrome.tabGroups.query({});
@@ -158,18 +169,33 @@ async function switchTabGroup(value) {
       targetTab = groupTabs[0];
     }
 
+    let targetWindowId = targetGroup.windowId;
+    if (separate) {
+      const windowTabs = await chrome.tabs.query({ windowId: targetWindowId });
+      if (windowTabs.some(tab => tab.groupId !== targetGroup.id && tab.id !== triggerTabId)) {
+        const destination = await chrome.windows.create({ type: 'normal', focused: false });
+        const blankTabIds = destination.tabs.map(tab => tab.id);
+        await chrome.tabGroups.move(targetGroup.id, { windowId: destination.id, index: -1 });
+        targetWindowId = destination.id;
+        await chrome.tabs.remove(blankTabIds);
+      }
+      await chrome.tabGroups.update(targetGroup.id, { collapsed: false });
+    }
+
     // 対象タブをアクティブ化（フラグを立てて記録を防ぐ）
     isActivatingTab = true;
     await chrome.tabs.update(targetTab.id, { active: true });
-    await chrome.windows.update(targetTab.windowId, { focused: true });
+    await chrome.windows.update(targetWindowId, { focused: true });
 
     // 少し待ってからフラグを下ろす（イベント処理が完了するまで）
     setTimeout(() => {
       isActivatingTab = false;
     }, 100);
+    return targetWindowId;
 
   } catch (error) {
     console.error('TabGroup Trigger: グループ切り替えエラー:', error);
+    throw error;
   }
 }
 

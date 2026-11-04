@@ -90,3 +90,11 @@ Example format:
  */
 
 ---
+
+## Separate window mode
+
+`https://extension.tabgroup-trigger/{group_name}?window=separate` displays an open group in its own normal window. If the group already occupies a window by itself, that window is reused. Otherwise the complete group moves to a new window; unrelated tabs remain in place. The new empty tab and the trigger tab are closed. The group's last selected tab is activated and the group is expanded.
+
+This mode does not restore closed saved groups and does not manage operating-system desktops. The URL without this parameter only switches to the group.
+
+Automation clients may add `&result=tab`. The trigger tab navigates to the extension's `result.html`, with `#window=<windowId>` on success or `#error=<URL-encoded message>` on failure. The client owns closing that result tab. No callback URL, external service, or desktop integration is involved.

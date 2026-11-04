@@ -388,3 +388,15 @@ gh pr create --base main --head your-branch
 ## プライバシーポリシー
 
 データ収集とプライバシーに関する情報については、[プライバシーポリシー](https://archelon-inc.github.io/TabGroup-Trigger/privacy-policy-ja)をご覧ください。
+
+## 独立ウィンドウで表示する
+
+`https://extension.tabgroup-trigger/GML?window=separate` のように `window=separate` を付けると、指定グループだけを独立ウィンドウに表示する。既に単独の窓にある場合は再利用し、他のタブと同居していればグループを分離する。空タブは残さず、グループ内で最後に選んだタブを表示する。
+
+対象は Chrome で開いているグループ。閉じた保存済みグループは先に Chrome で開く必要がある。デスクトップの移動は行わず、通常の URL はグループ切替だけを行う。
+
+開発時の確認: `node --test test/*.test.cjs`
+
+外部の自動操作で表示先の窓を識別する場合は `&result=tab` も指定する。トリガータブは閉じず、拡張内の結果ページへ移り、URL の fragment に `#window=<windowId>` を返す。失敗は `#error=<URL-encoded message>`。呼び出した側で結果タブを閉じる。指定しなければ結果タブを残さない。
+
+Mac で unpacked 版を読み込み、Chrome の「Apple Events からの JavaScript を許可」を有効にしている開発環境では、`python3 test/chrome-live.py <拡張ID>` で実機確認できる。空タブの試験用グループだけを作り、URL による分離・空タブの除去・元の窓の保持を確認して片付ける。`test/` は配布パッケージに含めない。
