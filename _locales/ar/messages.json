@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "فشل النسخ"
+  },
+  "separateWindows": {
+    "message": "فتح المجموعات في نوافذ منفصلة"
   }
 }

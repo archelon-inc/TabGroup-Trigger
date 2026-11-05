@@ -104,7 +104,8 @@ chrome.webNavigation.onBeforeNavigate.addListener(
 
       const resultTab = url.searchParams.get('result') === 'tab';
       try {
-        const windowId = await switchTabGroup(value, url.searchParams.get('window') === 'separate', details.tabId);
+        const { separateWindows } = await chrome.storage.local.get({ separateWindows: true });
+        const windowId = await switchTabGroup(value, separateWindows, details.tabId);
         if (resultTab) {
           if (!Number.isInteger(windowId)) throw new Error(`Group not found: ${value}`);
           await chrome.tabs.update(details.tabId, { url: `${chrome.runtime.getURL('result.html')}#window=${windowId}` });

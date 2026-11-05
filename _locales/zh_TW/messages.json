@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "複製失敗"
+  },
+  "separateWindows": {
+    "message": "在獨立視窗中開啟分頁群組"
   }
 }

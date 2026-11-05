@@ -26,6 +26,9 @@ Chrome doesn't provide native keyboard shortcuts for switching between tab group
 ✓ URL List Popup
   Click the extension icon to view all tab groups with their URL-encoded URLs, easily copyable with one click
 
+✓ Separate Windows
+  Groups open in their own windows by default. An existing standalone group window is reused. Turn off "Open groups in separate windows" in the extension popup to keep groups in their current windows.
+
 【How to Use】
 1. Create tab groups in Chrome and give them names
 2. Click the extension icon to get the URLs for each group:

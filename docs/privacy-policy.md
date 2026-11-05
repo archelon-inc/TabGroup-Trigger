@@ -1,6 +1,6 @@
 # Privacy Policy for TabGroup Trigger
 
-**Last Updated:** November 12, 2024
+**Last Updated:** November 5, 2026
 
 ## Overview
 
@@ -8,7 +8,7 @@ TabGroup Trigger ("the Extension") is committed to protecting your privacy. This
 
 ## Data Collection
 
-**The Extension does not collect, store, or transmit any personal data or usage information.**
+**The Extension does not collect or transmit personal data. It stores the window preference and last selected tab IDs locally.**
 
 All operations are performed locally on your device. No data is sent to external servers or third parties.
 
@@ -19,12 +19,12 @@ The Extension requires the following permissions to function properly:
 ### 1. `tabs` Permission
 - **Purpose:** To read tab information (title, URL, active status)
 - **Usage:** Required to identify and switch between tabs when navigating to tab groups
-- **Data Storage:** No tab data is stored permanently. All operations are performed in memory only.
+- **Data Storage:** Only the last selected tab ID per group is saved locally. Page contents, titles, and URLs are not saved.
 
 ### 2. `tabGroups` Permission
 - **Purpose:** To read and manage Chrome tab groups
 - **Usage:** Required to identify tab group names, retrieve group information, and switch to the specified group
-- **Data Storage:** No tab group data is stored permanently.
+- **Data Storage:** Group IDs are saved locally to associate each group with its last selected tab. Group names and URLs are not saved.
 
 ### 3. `webNavigation` Permission
 - **Purpose:** To intercept navigation to trigger URLs (`https://extension.tabgroup-trigger/*`)
@@ -32,9 +32,9 @@ The Extension requires the following permissions to function properly:
 - **Data Storage:** No navigation data is stored.
 
 ### 4. `sessions` Permission
-- **Purpose:** To remember the last active tab in each tab group
-- **Usage:** When you switch to a tab group, the Extension activates the tab you were last viewing in that group
-- **Data Storage:** Chrome's built-in session API stores this information locally. The Extension does not store or access this data externally.
+- **Purpose:** To restore recently closed tabs when a trigger tab is reopened with Cmd+Shift+T
+- **Usage:** Skip trigger tabs and restore the previous tab or window from Chrome's session history
+- **Data Storage:** Session history is managed by Chrome and is not copied by the Extension.
 
 ### 5. `host_permissions` for `https://extension.tabgroup-trigger/*`
 - **Purpose:** To intercept navigation to the Extension's trigger URLs
@@ -43,13 +43,11 @@ The Extension requires the following permissions to function properly:
 
 ## Local Data Storage
 
-The Extension does not use any persistent storage mechanisms such as:
-- `chrome.storage.local`
-- `chrome.storage.sync`
-- IndexedDB
-- localStorage
+The `storage` permission allows the Extension to use `chrome.storage.local` for:
+- The separate-window preference.
+- Group IDs and their last selected tab IDs.
 
-All operations are performed in real-time without storing any data.
+This data stays in the local Chrome profile, is not synchronized or transmitted, and is removed when the Extension is uninstalled. Page contents, group names, titles, and URLs are not saved by the Extension.
 
 ## Third-Party Services
 
@@ -61,7 +59,7 @@ The Extension does not share any data with third parties because it does not col
 
 ## Security
 
-Since the Extension does not collect, store, or transmit any data, there are no data security concerns related to personal information.
+Local preferences and tab IDs are held in Chrome-managed extension storage. The Extension does not transmit them.
 
 ## Children's Privacy
 
@@ -87,4 +85,4 @@ This Extension complies with:
 
 ---
 
-**Summary:** TabGroup Trigger respects your privacy by not collecting, storing, or transmitting any personal data. All operations are performed locally on your device.
+**Summary:** TabGroup Trigger respects your privacy by not collecting or transmitting personal data. All operations are performed locally on your device.

@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "Falha ao copiar"
+  },
+  "separateWindows": {
+    "message": "Abrir grupos em janelas separadas"
   }
 }
