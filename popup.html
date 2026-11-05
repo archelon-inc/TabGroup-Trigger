@@ -22,19 +22,6 @@
       margin: 0 0 16px 0;
     }
 
-    .window-setting {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 16px;
-      cursor: pointer;
-    }
-
-    #setting-error {
-      color: #b3261e;
-      margin: 0 0 16px;
-    }
-
     #groups-container {
       max-height: 500px;
       overflow-y: auto;
@@ -126,11 +113,6 @@
 </head>
 <body>
   <h1 data-i18n="extensionName">TabGroup Trigger</h1>
-  <label class="window-setting">
-    <input type="checkbox" id="separate-windows" checked disabled>
-    <span data-i18n="separateWindows">Open groups in separate windows</span>
-  </label>
-  <p id="setting-error" role="alert" hidden></p>
   <div id="groups-container">
     <div class="loading" data-i18n="loading">Loading...</div>
   </div>
