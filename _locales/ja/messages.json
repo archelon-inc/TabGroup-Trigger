@@ -25,8 +25,5 @@
   },
   "copyFailed": {
     "message": "コピー失敗"
-  },
-  "separateWindows": {
-    "message": "グループを独立ウィンドウで開く"
   }
 }

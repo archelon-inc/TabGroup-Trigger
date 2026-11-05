@@ -1,44 +1,92 @@
 # TabGroup Trigger Specification
 
-TabGroup Trigger is a Manifest V3 Chrome extension that displays open tab groups via URL invocation.
+## Overview
+TabGroup Trigger is a Chrome Extension (Manifest V3) that switches Chrome Tab Groups **via URL invocation**.
 
-## Trigger URL
+- No popup UI
+- No keyboard shortcuts
+- External tools (e.g., BetterTouchTool, Alfred, Raycast, shell scripts) can trigger switching
+- The extension reacts to URL navigation
 
-`https://extension.tabgroup-trigger/{group_name}`
+URL format:
+https://extension.tabgroup-trigger/{group_name or group_position}
 
-Decode the path as a URL-encoded group title. Match open groups by exact, case-sensitive title. Closed saved groups must first be opened in Chrome. Missing groups do not create windows.
+---
 
-## Window setting
+## URL Parameter Rules
 
-The extension popup contains **Open groups in separate windows**, enabled by default. Save this preference in `chrome.storage.local` and read it for each trigger. The URL does not select the window mode.
+1. If `{value}` exactly matches a **tab group title** (case-sensitive)  
+   → treat as `group_name`
 
-- Enabled: if the target group already occupies a normal window by itself, reuse that window. Otherwise move the complete group to a new normal window, leaving unrelated tabs in place. Remove the new blank tab and expand the group.
-- Disabled: keep the group in its current window and focus that window.
+2. If `{value}` is numeric (example: 1, 2, 3 ...)  
+   → treat as `group_position` (indexing left-to-right)
 
-Both modes activate the group's last selected tab, or its first tab if the remembered tab no longer exists. Close the trigger tab after switching. The extension does not manage operating-system desktops or depend on any external application.
+3. If both conditions are possible (example: a group titled "3")  
+   → **group_name has priority**
 
-## Automation result
+Examples:
+- https://extension.tabgroup-trigger/work  
+  → Switch to group title "work"
+- https://extension.tabgroup-trigger/3  
+  → Switch to the **3rd tab group from the left**
+- https://extension.tabgroup-trigger/2025  
+  → If a group named "2025" exists, use name (not numeric)
 
-`https://extension.tabgroup-trigger/{group_name}?result=tab`
+---
 
-Keep the trigger tab and navigate it to the extension's `result.html`, with `#window=<windowId>` on success or `#error=<URL-encoded message>` on failure. The caller closes this result tab. The window setting still applies. No callback URL or external service is involved.
+## Group Resolution Logic
 
-## Popup
+### `group_name` (highest priority)
+- Compare `{value}` with `group.title`
+- Exact match only
+- Case-sensitive
+- No partial match / no fuzzy match / no lowercase normalization
 
-Show the saved window setting and a list of open groups with URL-encoded trigger URLs and copy buttons. Changing the setting saves it immediately. Reopening the popup restores the saved value; a failed save restores the prior value and displays an error.
+### `group_position` (fallback when no group_name match)
+- Determine visual ordering of tab groups: left to right
+- `group_position` uses **1-based index**
 
-## Permissions
+---
 
-- `tabs`: read and activate tabs.
-- `tabGroups`: identify, expand, and move groups.
-- `webNavigation`: detect trigger URLs.
-- `sessions`: restore recently closed tabs when a trigger tab is reopened with Cmd+Shift+T.
-- `storage`: remember the last active tab per group and the window setting locally.
-- Host permission: `https://extension.tabgroup-trigger/*`.
+## Behavior when triggered
 
-## Verification
+1. The browser attempts to navigate to the URL (domain does not need to exist)
+2. The background service worker detects the navigation via `webNavigation` API
+3. Extract the `{value}` in the URL path
+4. Determine target tab group (name priority, otherwise positional)
+5. Activate the first tab belonging to that group
+6. Immediately close the tab created by the URL navigation
 
-- `node --test test/*.test.cjs`: exercise trigger URLs with browser API fixtures.
-- `python3 test/chrome-live.py <extension-id>`: exercise default separation, standalone window reuse, the popup setting, and persistence in Chrome. Create and remove only test tabs, and restore the original preference.
+The user should **not see any new tab appear**.
 
-Test files are excluded from distribution packages. Comments in `background.js` use Japanese JSDoc.
+---
+
+## Implementation Requirements
+
+- Manifest Version: 3
+- Background script: `background.js` (Service Worker)
+- Required permissions:
+  - `tabs`
+  - `tabGroups`
+  - `webNavigation`
+- Required host permissions:
+  - `"https://extension.tabgroup-trigger/*"`
+- No popup page
+- No UI
+- No `commands` (keyboard shortcuts)
+- No options page
+
+---
+
+## Code Comment Requirements
+
+- All comments inside `background.js` must use **jsDoc format**
+- Comment text must be **Japanese**
+
+Example format:
+
+/**
+ * グループ名または位置に基づきタブグループを切り替える
+ */
+
+---

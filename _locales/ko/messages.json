@@ -25,8 +25,5 @@
   },
   "copyFailed": {
     "message": "복사 실패"
-  },
-  "separateWindows": {
-    "message": "그룹을 별도 창에서 열기"
   }
 }
