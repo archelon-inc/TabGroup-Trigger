@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "复制失败"
+  },
+  "separateWindows": {
+    "message": "在独立窗口中打开标签页组"
   }
 }

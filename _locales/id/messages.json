@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "Gagal menyalin"
+  },
+  "separateWindows": {
+    "message": "Buka grup di jendela terpisah"
   }
 }

@@ -22,6 +22,35 @@ function localizeHtmlElements() {
   });
 }
 
+// URL を変えずに、次の呼び出しから表示方法を選べる。
+async function loadWindowSetting() {
+  const checkbox = document.getElementById('separate-windows');
+  const error = document.getElementById('setting-error');
+  try {
+    const { separateWindows } = await chrome.storage.local.get({ separateWindows: true });
+    checkbox.checked = separateWindows;
+    checkbox.disabled = false;
+  } catch {
+    error.textContent = chrome.i18n.getMessage('errorOccurred');
+    error.hidden = false;
+    return;
+  }
+  checkbox.addEventListener('change', async () => {
+    const separateWindows = checkbox.checked;
+    checkbox.disabled = true;
+    error.hidden = true;
+    try {
+      await chrome.storage.local.set({ separateWindows });
+    } catch {
+      checkbox.checked = !separateWindows;
+      error.textContent = chrome.i18n.getMessage('errorOccurred');
+      error.hidden = false;
+    } finally {
+      checkbox.disabled = false;
+    }
+  });
+}
+
 // タブグループを取得して表示
 async function loadTabGroups() {
   const container = document.getElementById('groups-container');
@@ -131,5 +160,6 @@ function selectText(element) {
 // ページ読み込み時に実行
 document.addEventListener('DOMContentLoaded', () => {
   localizeHtmlElements();
+  loadWindowSetting();
   loadTabGroups();
 });

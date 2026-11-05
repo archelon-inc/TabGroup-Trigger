@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "Sao chép thất bại"
+  },
+  "separateWindows": {
+    "message": "Mở nhóm trong cửa sổ riêng"
   }
 }

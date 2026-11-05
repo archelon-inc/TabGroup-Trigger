@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "Kopyalama başarısız"
+  },
+  "separateWindows": {
+    "message": "Grupları ayrı pencerelerde aç"
   }
 }

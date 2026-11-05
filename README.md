@@ -95,6 +95,10 @@ Group names with special characters are automatically decoded:
 https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → "仕事" group
 ```
 
+### Window setting
+
+Groups open in separate windows by default. An existing window containing only that group is reused; otherwise the group moves to a new window. To keep groups in their current windows, turn off **Open groups in separate windows** in the extension popup. The setting is saved locally and applies to all trigger URLs; no window-mode URL parameter is needed.
+
 ### Tips
 
 - The extension remembers which tab was last active in each group
@@ -291,6 +295,10 @@ Chromeにはタブグループを切り替えるためのネイティブなキ�
 https://extension.tabgroup-trigger/%E4%BB%95%E4%BA%8B  → 「仕事」グループ
 ```
 
+### ウィンドウの設定
+
+初期設定では、指定したグループを独立ウィンドウで開きます。既に単独の窓にある場合は再利用し、他のタブと同居していればグループを分離します。元の窓で切り替える場合は、拡張アイコンを押して **「グループを独立ウィンドウで開く」** を OFF にしてください。設定はローカルに保存され、すべてのトリガー URL に適用されます。URL でのモード指定は不要です。
+
 ### ヒント
 
 - 拡張機能は各グループで最後にアクティブだったタブを記憶します
@@ -391,12 +399,12 @@ gh pr create --base main --head your-branch
 
 ## 独立ウィンドウで表示する
 
-`https://extension.tabgroup-trigger/GML?window=separate` のように `window=separate` を付けると、指定グループだけを独立ウィンドウに表示する。既に単独の窓にある場合は再利用し、他のタブと同居していればグループを分離する。空タブは残さず、グループ内で最後に選んだタブを表示する。
+`https://extension.tabgroup-trigger/GML` で、拡張の設定に従ってグループを表示する。独立表示は初期値 ON。既に単独の窓にある場合は再利用し、他のタブと同居していればグループを分離する。空タブは残さず、グループ内で最後に選んだタブを表示する。
 
-対象は Chrome で開いているグループ。閉じた保存済みグループは先に Chrome で開く必要がある。デスクトップの移動は行わず、通常の URL はグループ切替だけを行う。
+対象は Chrome で開いているグループ。閉じた保存済みグループは先に Chrome で開く必要がある。デスクトップの移動は行わない。
 
 開発時の確認: `node --test test/*.test.cjs`
 
-外部の自動操作で表示先の窓を識別する場合は `&result=tab` も指定する。トリガータブは閉じず、拡張内の結果ページへ移り、URL の fragment に `#window=<windowId>` を返す。失敗は `#error=<URL-encoded message>`。呼び出した側で結果タブを閉じる。指定しなければ結果タブを残さない。
+外部の自動操作で表示先の窓を識別する場合は `?result=tab` を指定する。トリガータブは閉じず、拡張内の結果ページへ移り、URL の fragment に `#window=<windowId>` を返す。失敗は `#error=<URL-encoded message>`。呼び出した側で結果タブを閉じる。結果指定の有無にかかわらず、表示方法は拡張の設定に従う。
 
-Mac で unpacked 版を読み込み、Chrome の「Apple Events からの JavaScript を許可」を有効にしている開発環境では、`python3 test/chrome-live.py <拡張ID>` で実機確認できる。空タブの試験用グループだけを作り、URL による分離・空タブの除去・元の窓の保持を確認して片付ける。`test/` は配布パッケージに含めない。
+Mac で unpacked 版を読み込み、Chrome の「Apple Events からの JavaScript を許可」を有効にしている開発環境では、`python3 test/chrome-live.py <拡張ID>` で実機確認できる。試験用の空タブだけを使い、初期設定での分離・既存の独立窓の再利用・設定 OFF での同居・設定の保存を確認する。試験用のタブは片付け、元の設定も復元する。`test/` は配布パッケージに含めない。

@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "कॉपी विफल"
+  },
+  "separateWindows": {
+    "message": "समूहों को अलग विंडो में खोलें"
   }
 }

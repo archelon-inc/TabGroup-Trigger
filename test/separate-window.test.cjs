@@ -4,7 +4,8 @@ const vm = require('node:vm');
 const fs = require('node:fs');
 const path = require('node:path');
 
-function browser(otherTabs) {
+function browser(otherTabs, settings) {
+  const storage = { lastActiveTabInGroup: { 7: 12 }, ...settings };
   const tabs = [
     { id: 11, windowId: 1, groupId: 7, active: true },
     { id: 12, windowId: 1, groupId: 7, active: false },
@@ -19,8 +20,10 @@ function browser(otherTabs) {
     runtime: { getURL: file => `chrome-extension://test/${file}` },
     webNavigation: { onBeforeNavigate: { addListener(fn) { listeners.navigate = fn; } } },
     storage: { local: {
-      async get() { return { lastActiveTabInGroup: { 7: 12 } }; },
-      async set() {},
+      async get(keys) {
+        return typeof keys === 'string' ? { [keys]: storage[keys] } : { ...keys, ...storage };
+      },
+      async set(values) { Object.assign(storage, values); },
     } },
     tabGroups: {
       async query() { return groups.map(group => ({ ...group })); },
@@ -75,9 +78,9 @@ function browser(otherTabs) {
   };
 }
 
-test('独立表示は対象グループだけを新しい窓へ移し、空タブを残さない', async () => {
-  const state = browser([{ id: 13, windowId: 1, groupId: 8, active: false }]);
-  await state.navigate('?window=separate');
+test('初期設定は通常の URL で対象だけを独立表示し、空タブを残さない', async () => {
+  const state = browser([{ id: 13, windowId: 1, groupId: 8, active: false }], {});
+  await state.navigate('');
   assert.equal(state.groups[0].windowId, 2);
   assert.equal(state.groups[0].collapsed, false);
   assert.equal(state.focused, 2);
@@ -88,15 +91,15 @@ test('独立表示は対象グループだけを新しい窓へ移し、空タ�
 });
 
 test('既に単独の窓にあるグループは同じ窓を再利用する', async () => {
-  const state = browser([]);
-  await state.navigate('?window=separate');
+  const state = browser([], {});
+  await state.navigate('');
   assert.deepEqual([...state.windows], [1]);
   assert.equal(state.groups[0].windowId, 1);
   assert.deepEqual(state.tabs.map(tab => tab.id), [11, 12]);
 });
 
-test('通常の URL は他のタブと同居したまま切り替える', async () => {
-  const state = browser([{ id: 13, windowId: 1, groupId: -1 }]);
+test('独立表示を OFF にすると通常の URL で他のタブと同居したまま切り替える', async () => {
+  const state = browser([{ id: 13, windowId: 1, groupId: -1 }], { separateWindows: false });
   await state.navigate('');
   assert.deepEqual([...state.windows], [1]);
   assert.deepEqual(state.tabs.map(tab => tab.id), [11, 12, 13]);
@@ -104,24 +107,24 @@ test('通常の URL は他のタブと同居したまま切り替える', async 
 });
 
 test('見つからないグループは窓を作らずトリガータブだけ閉じる', async () => {
-  const state = browser([{ id: 13, windowId: 1, groupId: -1 }]);
+  const state = browser([{ id: 13, windowId: 1, groupId: -1 }], {});
   state.groups.length = 0;
-  await state.navigate('?window=separate');
+  await state.navigate('');
   assert.deepEqual([...state.windows], [1]);
   assert.deepEqual(state.tabs.map(tab => tab.id), [11, 12, 13]);
 });
 
 test('自動操作用の結果タブには実際に表示した窓の ID を返す', async () => {
-  const state = browser([{ id: 13, windowId: 1, groupId: 8 }]);
-  await state.navigate('?window=separate&result=tab');
+  const state = browser([{ id: 13, windowId: 1, groupId: 8 }], {});
+  await state.navigate('?result=tab');
   assert.equal(state.tabs.find(tab => tab.id === 19).url, 'chrome-extension://test/result.html#window=2');
   assert.deepEqual(state.tabs.filter(tab => tab.windowId === 2).map(tab => tab.id), [11, 12]);
 });
 
 test('自動操作用の結果タブは失敗も結果として返す', async () => {
-  const state = browser([]);
+  const state = browser([], {});
   state.groups.length = 0;
-  await state.navigate('?window=separate&result=tab');
+  await state.navigate('?result=tab');
   assert.match(state.tabs.find(tab => tab.id === 19).url, /result\.html#error=Group%20not%20found/);
   assert.deepEqual([...state.windows], [1]);
 });

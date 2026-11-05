@@ -25,5 +25,8 @@
   },
   "copyFailed": {
     "message": "Kopieren fehlgeschlagen"
+  },
+  "separateWindows": {
+    "message": "Gruppen in separaten Fenstern öffnen"
   }
 }
