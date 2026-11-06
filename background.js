@@ -105,7 +105,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(
       const resultTab = url.searchParams.get('result') === 'tab';
       try {
         const { separateWindows } = await chrome.storage.local.get({ separateWindows: true });
-        const windowId = await switchTabGroup(value, separateWindows, details.tabId);
+        const windowId = await switchTabGroup(value, separateWindows, details.tabId, !resultTab);
         if (resultTab) {
           if (!Number.isInteger(windowId)) throw new Error(`Group not found: ${value}`);
           await chrome.tabs.update(details.tabId, { url: `${chrome.runtime.getURL('result.html')}#window=${windowId}` });
@@ -129,9 +129,10 @@ chrome.webNavigation.onBeforeNavigate.addListener(
  * @param {string} value - グループ名または位置（1ベース）
  * @param {boolean} separate - グループだけの独立ウィンドウで表示するか
  * @param {number} triggerTabId - 切替後に閉じるトリガータブ
+ * @param {boolean} activate - 対象の窓へ入力フォーカスを移すか
  * @returns {Promise<number|undefined>} 表示したウィンドウの ID
  */
-async function switchTabGroup(value, separate, triggerTabId) {
+async function switchTabGroup(value, separate, triggerTabId, activate) {
   try {
     // すべてのタブグループを取得
     const groups = await chrome.tabGroups.query({});
@@ -186,7 +187,7 @@ async function switchTabGroup(value, separate, triggerTabId) {
     // 対象タブをアクティブ化（フラグを立てて記録を防ぐ）
     isActivatingTab = true;
     await chrome.tabs.update(targetTab.id, { active: true });
-    await chrome.windows.update(targetWindowId, { focused: true });
+    if (activate) await chrome.windows.update(targetWindowId, { focused: true });
 
     // 少し待ってからフラグを下ろす（イベント処理が完了するまで）
     setTimeout(() => {

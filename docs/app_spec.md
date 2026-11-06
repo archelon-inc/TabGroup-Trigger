@@ -21,7 +21,7 @@ Both modes activate the group's last selected tab, or its first tab if the remem
 
 `https://extension.tabgroup-trigger/{group_name}?result=tab`
 
-Keep the trigger tab and navigate it to the extension's `result.html`, with `#window=<windowId>` on success or `#error=<URL-encoded message>` on failure. The caller closes this result tab. The window setting still applies. No callback URL or external service is involved.
+Keep the trigger tab and navigate it to the extension's `result.html`, with `#window=<windowId>` on success or `#error=<URL-encoded message>` on failure. The caller closes this result tab and controls when to focus the prepared window. Result mode preserves the caller's input focus, including when it reuses an existing group window. The window setting still applies. No callback URL or external service is involved.
 
 ## Popup
 

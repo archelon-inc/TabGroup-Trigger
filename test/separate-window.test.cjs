@@ -56,9 +56,10 @@ function browser(otherTabs, settings) {
       },
     },
     windows: {
-      async create() {
+      async create(options) {
         const id = Math.max(...windows) + 1;
         windows.add(id);
+        if (options.focused !== false) focused = id;
         const tab = { id: 100 + id, windowId: id, groupId: -1, url: 'chrome://newtab/' };
         tabs.push(tab);
         return { id, tabs: [{ ...tab }] };
@@ -114,10 +115,14 @@ test('見つからないグループは窓を作らずトリガータブだけ�
   assert.deepEqual(state.tabs.map(tab => tab.id), [11, 12, 13]);
 });
 
-test('自動操作用の結果タブには実際に表示した窓の ID を返す', async () => {
+test('自動操作用の結果タブはフォーカスを保ち、準備した窓の ID を返す', async () => {
   const state = browser([{ id: 13, windowId: 1, groupId: 8 }], {});
   await state.navigate('?result=tab');
   assert.equal(state.tabs.find(tab => tab.id === 19).url, 'chrome-extension://test/result.html#window=2');
+  assert.equal(state.focused, 1);
+  assert.equal(state.tabs.find(tab => tab.id === 12).active, true);
+  await state.navigate('?result=tab');
+  assert.equal(state.focused, 1);
   assert.deepEqual(state.tabs.filter(tab => tab.windowId === 2).map(tab => tab.id), [11, 12]);
 });
 
